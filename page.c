@@ -3,41 +3,45 @@
 //
 
 #include "page.h"
-#include "librarian.h"
 #include "user.h"
 #include "book_management.h"
+#include "librarian.h"
 #include <stdio.h>
 
 //main page for all users:
-void page_browser(){
-    int choice;
-    float c;
-    printf("Please choose an option:\n");
-    printf("1) Register an account\n");
-    printf("2) Login\n");
-    printf("3) Search for books\n");
-    printf("4) Display all books\n");
-    printf("5) Quit\n");
-    scanf("%d",&choice);
-    if(choice>=1 && choice<=5){
-        switch(choice){
-            case 1:regist();
-            break;
-            case 2:login();
-            break;
-            case 3:search_book();
-            break;
-            case 4:display_all();
-            break;
-            case 5:return;
-            default:printf("Sorry, the option you entered was invalid, please try again.");
+void main_menu()//show_page模块
+{
+    while (1)
+    {
+        load_books();
+        users_file_to_list();
+        printf("Please choose an option\n");
+        printf("1)Register an account\n");
+        printf("2)Users login\n");
+        printf("3)Librarian login\n");
+        printf("4)Display all books\n");
+        printf("5)Search for book\n");
+        printf("6)Quit\n");
+        printf("  Option:");
+        int option; scanf("%d", &option);
+
+        switch (option)
+        {
+            case 1: user_register();
+                break;
+            case 2: user_login();
+                break;
+            case 3: librarian_login();
+                break;
+            case 4: display_book();
+                break;
+            case 5: search_book_menu();
+                break;
+            case 6: return;
+            default: printf("Invalid option!\n"); break;
         }
     }
-    else{
-        printf("Sorry, the option you entered was invalid, please try again.");
-    }
 }
-
 
 
 void search_book(){

@@ -15,4 +15,4 @@ add_executable(cw1_library
         page.h
         user.c
         user.h
-        )
+        Search.c Search.h add_function.c add_function.h)

@@ -5,175 +5,176 @@
 #include "user.h"
 #include "page.h"
 #include <stdio.h>
+#include "Search.h"
 
-void page_user(){
-    int choice;
-    printf("(Logged in as: Sam)\n");
-    printf("Please choose an option:\n");
-    printf("1) Borrow a book\n");
-    printf("2) Return a book\n");
-    printf("3) Search for books\n");
-    printf("4) Display all books\n");
-    printf("5) Quit\n");
-    scanf("%d",&choice);
-    if(choice>=1 && choice<=5){
-        switch(choice){
-            case 1:borrow_book();
+//用户登录大板块：
+
+//读取用户信息并将新的用户信息读到temp结构体中
+void users_file_to_list()//link_list模块
+{
+    user_head_node = (User*)malloc(sizeof(User));//user_head_node
+    user_head_node->next = NULL;//user_head_node->next=null
+    user_num = 0;//user_num
+
+    FILE* fp1;
+    fp1 = fopen("new_users.txt", "rb");
+    User* np;
+    np = user_head_node;
+    User* temp = (User*)malloc(sizeof(User));
+    while (fread(temp, sizeof(User), 1, fp1))
+    {
+        np->next = temp;
+        user_num++;
+        temp = (User*)malloc(sizeof(User));
+        np = np->next;
+    }
+    librarian= user_head_node->next;
+    fclose(fp1);
+}
+
+void user_borrow(User* borrow)//用户信息初始化  link_list
+{
+    borrow->user_book.borrow_amount = 0;
+    borrow->user_book.max_amount = 10;
+    memset(borrow->user_book.borrow_book, 0, sizeof(borrow->user_book.borrow_book));
+}
+
+void store_users()//将temp结构体写入用户信息文件中  user_login
+{
+    FILE* fp = fopen("new_users.txt", "wb");
+    User* temp = user_head_node->next;
+    while (temp)
+    {
+        fwrite(temp, sizeof(User), 1, fp);
+        temp = temp->next;
+    }
+    fclose(fp);
+}
+
+
+//case1: user_registration:
+void user_register()//账户注册   user_registration
+{
+    char username[30];
+    printf("Please enter your username:\n");
+    scanf("%s", username);
+    User* account;
+    if (account = serch_username(username), account != NULL)
+    {
+        printf("This username has been already registered!\n");
+        printf("Please change your username or login directly!\n");
+        return;
+    }
+    char name[20];
+    printf("Please enter your name:\n");
+    scanf("%s",name);
+    printf("Please input your password(no more than 30 letters or numbers):\n");
+    char password[30];
+    scanf("%s", password);
+    creat_user_list(username,name, password);
+    printf("register successfully!\n");
+    user_num++;
+}
+
+User* serch_username(char* name)  //user_login
+{
+    User* np = user_head_node->next;
+    while (np)
+    {
+        if (!strcmp(np->user_name, name)) return np;
+        np = np->next;
+    }
+    return NULL;
+}
+
+
+void creat_user_list(char* username, char*name,char* password)//创建用户信息链表，并调用store users函数   link_list
+{
+    User* np;
+    np = user_head_node;
+    while (np->next) np = np->next;
+    User* tp = (User*)malloc(sizeof(User));
+    strcpy(tp->user_name, username);
+    strcpy(tp->name,name);
+    strcpy(tp->password, password);
+    tp->admin = 0;
+    tp->next = NULL;
+    user_borrow(tp);
+    np->next = tp;
+    store_users();
+}
+
+//用户登录:
+void user_login()//用户登录
+{
+    char username[25];
+    char password[25];
+    printf("Please enter your username:\n");
+    scanf("%s", username);
+    User* temp;
+    if (temp = serch_username(username), temp == NULL)
+    {
+        printf("Invalid username!\n");
+        printf("Please registrate first!\n");
+        return;
+    }
+    printf("Please enter your password:\n");
+    scanf("%s", password);
+    if (strcmp(temp->password, password))
+    {
+        printf("Invalid password!\n");
+        printf("Please try again!");
+        return;
+    }
+    printf("Login successfully!...\n");
+    user_menu(temp);
+}
+
+//用户操作主页
+void user_menu(User* account)  //show_page
+{
+    while (1)
+    {
+        printf("+--------------------------------------------------------------+\n");
+        printf("user:%s\n", account->user_name);
+        printf("input your option\n");
+        printf("1)borrow book\n");
+        printf("2)return book\n");
+        printf("3)my borrow\n");
+        printf("4)display book\n");
+        printf("5)change password\n");
+        //printf("6)remove account\n");
+        printf("0)log out\n");
+        printf("+--------------------------------------------------------------+\n");
+        int op; scanf("%d", &op);
+        switch (op)
+        {
+            case 1: //borrow_book(account);
+                printf("Borrow book!\n");
                 break;
-            case 2:return_book();
+            case 2: //return_book(account);
+                printf("Borrow book!\n");
                 break;
-            case 3:search_book();
+            case 3: //history(account);
+                printf("Borrow book!\n");
                 break;
-            case 4:display_all();
+            case 4: //display_book();
+                printf("Borrow book!\n");
                 break;
-            case 5:return;
-            default:printf("Sorry, the option you entered was invalid, please try again.");
+            case 5: //user_change(account);
+                printf("Borrow book!\n");
+                break;
+//            case 6: if (delete_user(account))
+//                {
+//                    printf("the account has been deleted!\n");
+//                    return;
+//                }
+//                else break;
+            case 0: printf("come back successfully!\n");return;
+            default: printf("invalid option!\n"); break;
         }
     }
-    else{
-        printf("Sorry, the option you entered was invalid, please try again.");
-
-    }
-}
-
-//用户注册账号
-void registration(){
-    users already,new;
-    FILE *fp_1;
-    char password_temp[20];
-    char password[];
-
-
-    //读取已有的账户信息存储到结构体already中,b=already
-    fp_1=fopen("users.txt","r");
-    fread(&already,sizeof(struct Users_info),1,fp);
-
-    //存储输入的账户信息到结构体new中,a=new
-    printf("Please enter your username: \n");
-    scanf("%s",&new.username);
-
-
-    //比较输入的和已有的账户信息是否重合
-    while(1){
-        if(strcmp(already.username,new.username)!=0){//strcmp不返回0，字符串不相等，即注册信息有效
-            if(feof(fp)!=0){//feof后面有字符返回0，没有返回非0
-                fread(&already,sizeof(struct Users_info),1,fp_1)
-            }
-            else{
-                break;
-            }
-        }
-        else{//用户已经存在，提示重新注册
-            printf("Sorry, the user have already existed!\n");
-            printf("Please try again!\n");
-            fclose(fp_1);
-            return;
-        }
-    }
-
-
-    //提示输入用户密码
-    printf("Please enter your password: \n");
-    scanf("%s",&new.password);
-    printf("Please confirm your password: \n");
-    scanf("%s",&password_temp);
-    do{
-        if(!strcmp(new.password,password_temp)){//如果密码确定一样，则写入文件
-            fp_1=fopen("users.txt","a");
-            fwrite(&new,sizeof(struct Users_info),1,fp);
-            printf("Registered library account successfully!\n");
-            fclose(fp_1);
-            return;
-        }
-        else{
-            printf("The two passwords do not match, please re-enter:\n");
-            printf("Please enter your password: \n");
-            scanf("%s",&new.password);
-            printf("Please confirm your password: \n");
-            scanf("%s",&password_temp);
-        }
-    }while(1);
-}
-
-void create_user_info(){
-    FILE *fp;
-    if((fp=fopen("users.txt","rb"))==NULL){
-        if((fp=fopen("users.txt","wb+"))==NULL){
-            printf("Sorry, you cannot create a new file.\n");
-            exit(0);
-        }
-    }
 }
 
 
 
-
-//用户登录
-void login(){
-//    char name[];
-//    char password[];
-//    printf("Please enter your username: ");
-//    scanf("%s",name);
-//    printf("Please enter your password: ");
-//    scanf("%s",password);
-
-    users already,new;
-    FILE *fp_2;
-
-    //读取已有的账户信息存储到结构体already中,b=already
-    fp_2=fopen("users.txt","r");
-    fread(&already,sizeof(struct Users_info),1,fp_2);
-
-
-    printf("Please enter your username: \n");
-    scanf("%s",&new.username);
-
-    while(1){//判断用户是否存在
-        if(strcmp(new.username,already.username)==0){//用户存在
-            break;
-        }
-        else{//用户不存在
-            if(!feof(fp_2)){//文件没读完
-                fread(&already,sizeof(struct Users_info),1,fp_2);
-            }
-            else{
-                printf("This user doesn't exist!\n");
-                //Sleep(500);
-                fclose(fp_2);
-                return;
-            }
-        }
-    }
-    printf("Please enter your password: \n");
-    scanf("%s",&new.password);
-
-    do{
-        if(strcmp(new.password,already.password)==0){//密码正确
-            fclose(fp_2);
-            printf("Successfully login!\n");
-            //Sleep(500);
-            return;
-        }
-        else{
-            printf("Invalid password! Please re-enter the password: \n");
-            scanf("%s",&new.password);
-        }
-    }while(strcmp(new.password,already.password)==0);
-}
-
-
-
-
-
-
-
-//borrow book
-void borrow_book(){
-
-}
-
-
-//return book
-void return_book(){
-
-}
